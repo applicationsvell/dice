@@ -1,5 +1,5 @@
 // 紅白ダイス Service Worker（node src/build-app.js で作り直す）
-const VERSION = 'fae30e22a9';
+const VERSION = '1daed56e19';
 const CACHE = 'kouhaku-dice-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.webmanifest',
   './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png'];

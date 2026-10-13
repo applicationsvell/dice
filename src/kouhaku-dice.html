@@ -668,14 +668,27 @@ function roll(winner) {
   if (!raf) raf = requestAnimationFrame(frame);
 }
 
-/* ---------- input: top half → red wins, bottom half → white wins ---------- */
+/* ---------- input: the die nearer the finger loses, the other one wins ---------- */
+function screenPoint(p) {
+  const m = viewVP;
+  const x = m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12];
+  const y = m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13];
+  const w = m[3] * p[0] + m[7] * p[1] + m[11] * p[2] + m[15];
+  return [(x / w * 0.5 + 0.5) * canvas.clientWidth, (0.5 - y / w * 0.5) * canvas.clientHeight];
+}
+function winnerForTap(px, py) {
+  const w = screenPoint(DICE[0].pos), r = screenPoint(DICE[1].pos);
+  const toWhite = Math.hypot(px - w[0], py - w[1]), toRed = Math.hypot(px - r[0], py - r[1]);
+  if (Math.abs(toWhite - toRed) < 0.5) return Math.random() < 0.5 ? 'white' : 'red';
+  return toWhite < toRed ? 'red' : 'white';
+}
 canvas.addEventListener('pointerdown', e => {
   if (e.button > 0) return;
   e.preventDefault();
   ensureAudio(); requestWake();
-  if (rolling) return;
-  const r = canvas.getBoundingClientRect();
-  roll(e.clientY - r.top >= r.height / 2 ? 'white' : 'red');
+  if (rolling || !viewVP) return;
+  const rect = canvas.getBoundingClientRect();
+  roll(winnerForTap(e.clientX - rect.left, e.clientY - rect.top));
 }, { passive: false });
 canvas.addEventListener('keydown', e => {
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
